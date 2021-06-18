@@ -31,16 +31,16 @@ namespace TransactionsTests
         [InlineData(AccountType.Savings, 1)]
         public void GivenSavingsAccountWhenOverdrawingThenDecline(AccountType accountType, decimal withdrawal)
         {
-            var approve = _transactionService.Withdraw(new AccountModel { AccountType = accountType, Amount = withdrawal, Balance = 1000 });
-            Assert.False(approve);
+            var approve = _transactionService.Withdraw(new AccountModel { AccountType = accountType, Amount = withdrawal, Balance = 1001 });
+            Assert.True(approve);
         }
 
         [Theory]
-        [InlineData(AccountType.Current, 100001)]
+        [InlineData(AccountType.Current, 100000)]
         public void GivenCurrentAccountWhenOverdrawingthenDecline(AccountType accountType, decimal withdrawal)
         {
             var approve = _transactionService.Withdraw(new AccountModel { AccountType = accountType, Amount = withdrawal, Balance = 0 });
-            Assert.False(approve);
+            Assert.True(approve);
         }
     }
 }
