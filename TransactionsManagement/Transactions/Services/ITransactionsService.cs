@@ -13,5 +13,8 @@ namespace Transactions.Services
         bool Deposit(AccountModel accountModel);
         decimal GetAccountBalance(Guid accountId);
         IEnumerable<AccountModel> GetAllAccounts();
+        AccountModel GetAccount(Guid id);
+        void SaveAccount(AccountModel accountModel);
+        IEnumerable<TransactionsModel> GetAllTransactions(Guid id);
     }
 }

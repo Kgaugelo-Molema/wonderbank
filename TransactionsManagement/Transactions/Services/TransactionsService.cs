@@ -22,6 +22,17 @@ namespace Transactions.Services
             return _context.Transactions;
         }
 
+        public IEnumerable<TransactionsModel> GetAllTransactions(Guid id)
+        {
+            var transactions = GetAllTransactions();
+            return transactions.Where(account => account.AccountId == id);
+        }
+
+        public AccountModel GetAccount(Guid id)
+        {
+            return _context.Accounts.Find(id);
+        }
+
         public IEnumerable<AccountModel> GetAllAccounts()
         {
             return _context.Accounts;
@@ -52,16 +63,23 @@ namespace Transactions.Services
 
         public bool Withdraw(AccountModel accountModel)
         {
-            var result = false;
+            bool result;
+            string message;
             switch (accountModel.AccountType)
             {
                 case AccountType.Savings:
                     result = ValidateMinimumBalance(accountModel);
+                    message = "Savings account needs to have a minimum balance of R1,000.00 at all time";
                     break;
                 default:
                     result = ValidateOverdraft(accountModel);
+                    message = "Current account can have an overdraft limit of R100,000.00";
                     break;
             }
+            if (!result)
+                throw new AppException(message);
+
+            accountModel.Balance -= accountModel.Amount;
             return result;
         }
 
@@ -101,9 +119,13 @@ namespace Transactions.Services
             if (!result)
                 throw new AppException("Savings account can only be opened through a minimum deposit of R1,000.00");
 
+            return result;
+        }
+
+        public void SaveAccount(AccountModel accountModel)
+        {
             _context.Accounts.Add(accountModel);
             _context.SaveChanges();
-            return result;
         }
     }
 

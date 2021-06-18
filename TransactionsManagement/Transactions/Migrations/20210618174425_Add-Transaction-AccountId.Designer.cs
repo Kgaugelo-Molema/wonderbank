@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Transactions.Helpers;
 
 namespace Transactions.Migrations
 {
     [DbContext(typeof(SqlDataContext))]
-    partial class SqlDataContextModelSnapshot : ModelSnapshot
+    [Migration("20210618174425_Add-Transaction-AccountId")]
+    partial class AddTransactionAccountId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

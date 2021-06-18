@@ -47,6 +47,27 @@ namespace Transactions.Controllers
         }
 
         /// <summary>
+        /// List account transactions
+        /// </summary>
+        [HttpGet]
+        [Route("get/transactions/{id}")]
+        public IActionResult GetAllTransactions([FromRoute]Guid id)
+        {
+            var transactions = _transactionsService.GetAllTransactions(id);
+
+            var dtos = new List<TransactionsDto>();
+            IMapper mapper;
+            foreach (var transaction in transactions)
+            {
+                // map model to dto
+                mapper = this.GetMapper<TransactionsModel, TransactionsDto>();
+                var dto = mapper.Map<TransactionsDto>(transaction);
+                dtos.Add(dto);
+            }
+            return Ok(dtos);
+        }
+
+        /// <summary>
         /// List all accounts
         /// </summary>
         [HttpGet]
@@ -61,13 +82,17 @@ namespace Transactions.Controllers
         /// Open Account
         /// </summary>
         [HttpPost("open")]
-        public IActionResult OpenAccount([FromQuery]AccountType accountType, [FromQuery]decimal amount)
+        public IActionResult OpenAccount([FromQuery] AccountType accountType, [FromQuery] decimal amount)
         {
             try
             {
                 var id = Guid.NewGuid();
-                var accountModel = new AccountModel { Id = id, AccountType = accountType, Amount = amount, Balance = 0 };
+                var accountModel = new AccountModel { Id = id, AccountType = accountType, Amount = amount, Balance = amount };
                 var result = _transactionsService.OpenAccount(accountModel);
+
+                _transactionsService.SaveAccount(accountModel);
+
+                SaveTransaction("Open", accountModel);
                 return Ok(accountModel);
             }
             catch (AppException ex)
@@ -80,13 +105,15 @@ namespace Transactions.Controllers
         /// Deposit amount
         /// </summary>
         [HttpPost("deposit")]
-        public IActionResult DepositAmount([FromQuery]Guid id, [FromQuery]AccountType accountType, [FromQuery]decimal amount)
+        public IActionResult DepositAmount([FromQuery] Guid id, [FromQuery] decimal amount)
         {
             try
             {
-                var balance = _transactionsService.GetAccountBalance(id);
-                var accountModel = new AccountModel { Id = id, AccountType = accountType, Amount = amount, Balance = balance };
+                var accountModel = _transactionsService.GetAccount(id);
+                accountModel.Amount = amount;
                 var result = _transactionsService.Deposit(accountModel);
+
+                SaveTransaction("Deposit", accountModel);
                 return Ok(accountModel);
             }
             catch (AppException ex)
@@ -99,19 +126,27 @@ namespace Transactions.Controllers
         /// Withdraw amount
         /// </summary>
         [HttpPost("withdraw")]
-        public IActionResult WithdrawAmount([FromQuery]Guid id, [FromQuery]AccountType accountType, [FromQuery]decimal amount)
+        public IActionResult WithdrawAmount([FromQuery] Guid id, [FromQuery] decimal amount)
         {
             try
             {
-                var balance = _transactionsService.GetAccountBalance(id);
-                var accountModel = new AccountModel { Id = id, AccountType = accountType, Amount = amount, Balance = balance };
+                var accountModel = _transactionsService.GetAccount(id);
+                accountModel.Amount = amount;
                 var result = _transactionsService.Withdraw(accountModel);
+
+                SaveTransaction("Withdrawal", accountModel);
                 return Ok(accountModel);
             }
             catch (AppException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
+        }
+
+        private void SaveTransaction(string operation, AccountModel accountModel)
+        {
+            var transaction = new TransactionsModel { Description = $"{operation}: Balance R{accountModel.Balance}", Amount = accountModel.Amount, AccountId = accountModel.Id };
+            _transactionsService.Add(transaction);
         }
 
         /// <summary>
@@ -121,7 +156,7 @@ namespace Transactions.Controllers
         /// ZAR
         /// </param>
         [HttpPost("add")]
-        public IActionResult Add([FromQuery]string description, [FromQuery]decimal amount)
+        public IActionResult Add([FromQuery] string description, [FromQuery] decimal amount)
         {
             try
             {
@@ -147,7 +182,7 @@ namespace Transactions.Controllers
         /// ZAR
         /// </param>
         [HttpPost("save")]
-        public IActionResult Save([FromBody]IEnumerable<TransactionsDto> data)
+        public IActionResult Save([FromBody] IEnumerable<TransactionsDto> data)
         {
             try
             {
@@ -194,7 +229,7 @@ namespace Transactions.Controllers
         /// The Id is required
         /// </param>
         [HttpPut("edit")]
-        public IActionResult Edit([FromQuery]int id, [FromQuery]string description, [FromQuery]decimal amount)
+        public IActionResult Edit([FromQuery] int id, [FromQuery] string description, [FromQuery] decimal amount)
         {
             try
             {
