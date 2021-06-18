@@ -50,8 +50,6 @@ namespace Transactions.Controllers
         /// </summary>
         /// <param name="accountType">
         /// <param name="amount">
-        /// ZAR
-        /// </param>
         [HttpPost("open")]
         public IActionResult Add([FromQuery]AccountType accountType, [FromQuery]decimal amount)
         {
