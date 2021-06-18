@@ -20,5 +20,6 @@ namespace Transactions.Helpers
         }
 
         public DbSet<TransactionsModel> Transactions { get; set; }
+        public DbSet<AccountModel> Accounts { get; set; }
     }
 }

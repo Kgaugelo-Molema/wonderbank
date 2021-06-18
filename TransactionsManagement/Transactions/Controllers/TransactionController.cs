@@ -28,9 +28,6 @@ namespace Transactions.Controllers
         /// <summary>
         /// List all transactions
         /// </summary>
-        /// <param name="amount">
-        /// ZAR
-        /// </param>
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -46,6 +43,29 @@ namespace Transactions.Controllers
                 dtos.Add(dto);
             }
             return Ok(dtos);
+        }
+
+        /// <summary>
+        /// Open Account
+        /// </summary>
+        /// <param name="accountType">
+        /// <param name="amount">
+        /// ZAR
+        /// </param>
+        [HttpPost("open")]
+        public IActionResult Add([FromQuery]AccountType accountType, [FromQuery]decimal amount)
+        {
+            try
+            {
+                var accountModel = new AccountModel { Id = Guid.NewGuid(), AccountType = accountType, Amount = amount, Balance = _transactionsService.GetAccountBalance() };
+                var result = _transactionsService.OpenAccount(accountModel);
+                return Ok(accountModel);
+            }
+            catch (AppException ex)
+            {
+                // return error message if there was an exception
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>

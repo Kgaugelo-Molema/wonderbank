@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Transactions.Services;
+﻿using Transactions.Services;
 using Xunit;
 
 namespace TransactionsTests

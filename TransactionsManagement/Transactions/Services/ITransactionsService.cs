@@ -7,5 +7,8 @@ namespace Transactions.Services
     {
         IEnumerable<TransactionsModel> GetAll();
         TransactionsModel Add(TransactionsModel transaction);
+        bool Withdraw(AccountModel accountModel);
+        bool OpenAccount(AccountModel accountModel);
+        decimal GetAccountBalance();
     }
 }

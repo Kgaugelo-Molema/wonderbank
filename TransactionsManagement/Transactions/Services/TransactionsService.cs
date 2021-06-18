@@ -44,6 +44,56 @@ namespace Transactions.Services
 
             return transaction;
         }
+
+        public bool Withdraw(AccountModel accountModel)
+        {
+            var result = false;
+            switch (accountModel.AccountType)
+            {
+                case AccountType.Savings:
+                    result = ValidateMinimumBalance(accountModel);
+                    break;
+                default:
+                    result = ValidateOverdraft(accountModel);
+                    break;
+            }
+            return result;
+        }
+
+        private bool ValidateOverdraft(AccountModel accountModel)
+        {
+            return accountModel.Balance - accountModel.Amount >= -100000;
+        }
+
+        private bool ValidateMinimumBalance(AccountModel accountModel)
+        {
+            return accountModel.Balance - accountModel.Amount >= 1000;
+        }
+
+        public decimal GetAccountBalance()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Deposit(AccountModel accountModel)
+        {
+            accountModel.Balance += accountModel.Amount;
+            return true;
+        }
+
+        public bool OpenAccount(AccountModel accountModel)
+        {
+            var result = true;
+            switch (accountModel.AccountType)
+            {
+                case AccountType.Savings:
+                    result = accountModel.Amount >= 1000m;
+                    break;
+                default:
+                    break;
+            }
+            return result;
+        }
     }
 
     public static class TransactionValidator
@@ -56,4 +106,5 @@ namespace Transactions.Services
             return result;
         }
     }
+
 }
