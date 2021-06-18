@@ -17,9 +17,14 @@ namespace Transactions.Services
             _context = context;
         }
 
-        public IEnumerable<TransactionsModel> GetAll()
+        public IEnumerable<TransactionsModel> GetAllTransactions()
         {
             return _context.Transactions;
+        }
+
+        public IEnumerable<AccountModel> GetAllAccounts()
+        {
+            return _context.Accounts;
         }
 
         public TransactionsModel Add(TransactionsModel transaction)
@@ -70,9 +75,10 @@ namespace Transactions.Services
             return accountModel.Balance - accountModel.Amount >= 1000;
         }
 
-        public decimal GetAccountBalance()
+        public decimal GetAccountBalance(Guid accountId)
         {
-            throw new NotImplementedException();
+            var account = _context.Accounts.Find(accountId);
+            return account.Balance;
         }
 
         public bool Deposit(AccountModel accountModel)
@@ -92,6 +98,11 @@ namespace Transactions.Services
                 default:
                     break;
             }
+            if (!result)
+                throw new AppException("Savings account can only be opened through a minimum deposit of R1,000.00");
+
+            _context.Accounts.Add(accountModel);
+            _context.SaveChanges();
             return result;
         }
     }

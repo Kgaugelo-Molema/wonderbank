@@ -29,9 +29,10 @@ namespace Transactions.Controllers
         /// List all transactions
         /// </summary>
         [HttpGet]
-        public IActionResult GetAll()
+        [Route("get/transactions")]
+        public IActionResult GetAllTransactions()
         {
-            var transactions = _transactionsService.GetAll();
+            var transactions = _transactionsService.GetAllTransactions();
 
             var dtos = new List<TransactionsDto>();
             IMapper mapper;
@@ -46,22 +47,69 @@ namespace Transactions.Controllers
         }
 
         /// <summary>
+        /// List all accounts
+        /// </summary>
+        [HttpGet]
+        [Route("get/accounts")]
+        public IActionResult GetAllAccounts()
+        {
+            var accounts = _transactionsService.GetAllAccounts();
+            return Ok(accounts);
+        }
+
+        /// <summary>
         /// Open Account
         /// </summary>
-        /// <param name="accountType">
-        /// <param name="amount">
         [HttpPost("open")]
-        public IActionResult Add([FromQuery]AccountType accountType, [FromQuery]decimal amount)
+        public IActionResult OpenAccount([FromQuery]AccountType accountType, [FromQuery]decimal amount)
         {
             try
             {
-                var accountModel = new AccountModel { Id = Guid.NewGuid(), AccountType = accountType, Amount = amount, Balance = _transactionsService.GetAccountBalance() };
+                var id = Guid.NewGuid();
+                var accountModel = new AccountModel { Id = id, AccountType = accountType, Amount = amount, Balance = 0 };
                 var result = _transactionsService.OpenAccount(accountModel);
                 return Ok(accountModel);
             }
             catch (AppException ex)
             {
-                // return error message if there was an exception
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Deposit amount
+        /// </summary>
+        [HttpPost("deposit")]
+        public IActionResult DepositAmount([FromQuery]Guid id, [FromQuery]AccountType accountType, [FromQuery]decimal amount)
+        {
+            try
+            {
+                var balance = _transactionsService.GetAccountBalance(id);
+                var accountModel = new AccountModel { Id = id, AccountType = accountType, Amount = amount, Balance = balance };
+                var result = _transactionsService.Deposit(accountModel);
+                return Ok(accountModel);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Withdraw amount
+        /// </summary>
+        [HttpPost("withdraw")]
+        public IActionResult WithdrawAmount([FromQuery]Guid id, [FromQuery]AccountType accountType, [FromQuery]decimal amount)
+        {
+            try
+            {
+                var balance = _transactionsService.GetAccountBalance(id);
+                var accountModel = new AccountModel { Id = id, AccountType = accountType, Amount = amount, Balance = balance };
+                var result = _transactionsService.Withdraw(accountModel);
+                return Ok(accountModel);
+            }
+            catch (AppException ex)
+            {
                 return BadRequest(new { message = ex.Message });
             }
         }

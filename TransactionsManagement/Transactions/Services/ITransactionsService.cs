@@ -1,14 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Transactions.Models;
 
 namespace Transactions.Services
 {
     public interface ITransactionsService
     {
-        IEnumerable<TransactionsModel> GetAll();
+        IEnumerable<TransactionsModel> GetAllTransactions();
         TransactionsModel Add(TransactionsModel transaction);
         bool Withdraw(AccountModel accountModel);
         bool OpenAccount(AccountModel accountModel);
-        decimal GetAccountBalance();
+        bool Deposit(AccountModel accountModel);
+        decimal GetAccountBalance(Guid accountId);
+        IEnumerable<AccountModel> GetAllAccounts();
     }
 }
